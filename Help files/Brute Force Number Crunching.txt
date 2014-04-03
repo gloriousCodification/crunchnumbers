@@ -1,0 +1,52 @@
+Brute Force Algoritme
+
+Stap 1: Vind de toestandsruimte.
+
+	Definieer S(i) als de toestandsruimte na maximaal i operaties.
+	Een element in S(i) bestaan uit de volgorde van de operaties in deze toestand én
+	de uitkomst als deze operaties op 4 worden uitgevoerd. 
+	
+	Hiervoor wordt gebruikt:
+		! = faculteit
+		r = square root
+		f = floor
+	
+	Voorbeelden: 
+		
+		S(0) = []
+		S(1) = [("!", 24), ("r", 2), ("f", 4)] (waarvan de laatste weggelaten kan worden)
+		S(2) = [("!", 24), ("r", 2), ("f", 4), ("!!", 24!), ("!r", 4.89...), 
+				("!f", 24), ... , ("fr", 2), ("ff", 4)]
+
+	
+	S(i) kan recursief worden gevonden:
+	
+	1.	Initialiseer S(i) := S(i-1)  (S(i) := [] als i=0)
+	
+	2. 	for elem in S(i-1):
+			
+			// Creer nieuwe elementen voor in S(i)
+			voeg ( elem[0] + "!", elem[1]! ) toe aan S(i)
+			voeg ( elem[0] + "r", sqrt(elem[1]) ) toe aan S(i)
+			voeg ( elem[0] + "f", float(elem[1]) ) toe aan S(i)
+	
+	Het aantal mogelijkheden na i operaties is gelijk aan:
+		
+		3^i + 3^(i-1) + ... + 3
+	
+Stap 2: Zoek door de toestandsruimte S(i) voor een toestand met de gewenste uitkomst
+
+	Om de beste oplossing voor getal X te vinden wordt de toestandsruimte S(i) 
+	(i groot) doorzocht totdat een volgorde van operaties is gevonden waarvoor dit getal
+	X de uitkomst is. Als dit getal niet wordt gevonden dan dient er een grotere i
+	gekozen te worden.
+	
+	Vind beste oplossing voor X
+	
+	1.	bestSolution = "not found"
+	
+	2.	for state in S(i):
+			
+			if oplossing van de toestand gelijk is aan X:
+				bestSolution = volgorde van operaties van deze toestand
+				break omdat beste oplossing is gevonden

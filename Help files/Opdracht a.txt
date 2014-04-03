@@ -1,0 +1,139 @@
+Vind de oplossing voor de getallen 1, 2, 5 en 24 en daarna voor 6, 10, 26 en 30.
+
+Logisch beredeneren:
+
+	De (vierkants)wortel (w) trekken is de enige operatie die het getal kan verkleinen.
+	
+	De faculteit (!) is de enige operatie die het getal kan vergroten.
+	
+	De floor (f) operatie is nodig omdat de wortel vaak een niet-integer als uitkomst geeft en
+	de faculteit alleen toegepast kan worden op integers.
+
+
+1 en 2
+	
+	Om de oplossing voor 1 en 2 te vinden dient eerst de wortel genomen te worden omdat
+	dit de enige operator is die het getal vier kan verminderen.
+	
+	sqrt(4) = 2
+	
+	Dit is dus al de oplossing voor 2. Om nog lager te gaan dient weer de wortel genomen
+	te worden.
+	
+	sqrt(2) = 1.414...
+	
+	Wordt deze gefloord dan is de uitkomst 1.
+	
+	floor(1.414...) = 1
+	
+	
+	Uitkomst	Oplossing
+	2			w
+	1			wwf
+
+
+5 en 24
+
+	Om op een uitkomst hoger dan 4 uit te komen kan alleen gebruikgemaakt worden van de 
+	faculteit.
+	
+	4! = 24
+	
+	Wat dus de oplossing is voor 24. Om 5 te vinden zou verwacht worden dat de wortel een 
+	uitkomst biedt. Echter, sqrt(24) = 4.898... Omdat de faculteit van een niet integer 
+	niet bestaat kan alleen gefloord (1) of de wortel (2) getrokken worden. 
+	
+	(1) De wortel trekken geeft 2.213... waar we niks aan hebben omdat nog een wortel of 
+	een floor ons een getal geeft kleiner of gelijk aan 2 waardoor we nooit meer hoger 
+	uitkomen (2! = 2*1 = 2, 1!=0!=1).
+	(2) Een floor geeft weer 4, wat ons niet verder brengt dan het startpunt.
+	
+	Het is dus niet anders dan dat nog een faculteit moet worden gebruikt.
+	
+	4! = 24
+	24! = Een heel groot getal (6.2E23)
+	
+	Na vijf wortels is dit hele grote getal gelijk aan 5.54... Een floor geeft ons de
+	uitkomst 5.
+	
+	
+	Uitkomst	Oplossing
+	24			!
+	5			!!wwwwwf
+	
+	
+6, 10, 26 en 30
+
+	Nu het getal vijf is gevonden, biedt dit meer mogelijkheden. We borduren verder en
+	kijken waar we uitkomen:
+	
+	5! = 120
+	sqrt(120) = 10.95...
+	
+	Dit flooren geeft 10 (!!wwwwwf!wf)
+	
+	
+	verder met het getal voordat deze werd gefloord: 
+	sqrt(10.95...) = 3.309...
+	floor(3.309...) = 3
+	3! = 6
+	
+	Dus uitkomst 6 door !!wwwwwf!wwf!
+	
+	
+	Omdat we bij het hele grote getal (24!) alleen maar gefocust waren op het vinden van 
+	de uitkomst 5 lijkt het een goed idee om deze nog eens te bekijken.
+	We zien dat als we 4 maal de wortel nemen van het hele grote getal we uitkomen op 
+	30.693... Dit flooren geeft 30.
+	
+	Oplossing 30 met !!wwww
+	
+	
+	Het vinden van de oplossingen 10, 30, en 6 bieden weer nieuwe mogelijkheden die
+	onderzocht moeten worden.
+	
+	sqrt(10) is al gebruikt om 6 te vinden
+	10! = 3628000  wat na een paar wortels 43.645... en 6.606... geeft 
+		(waar we nu even niks aan hebben)
+	
+	sqrt(30) hebben we praktisch al gebruikt bij het vinden van 5
+	30! = een zeer groot getal wat na wat wortels alleen 10.309... geeft
+		Alleen getallen onder de honderd worden bekeken en tien is al gevonden, dit
+		resultaat is dus zinloos.
+	
+	sqrt(6) = 2.449... wat niet verder helpt
+	6! = 720, sqrt(720) = 26.832... wat na een floor natuurlijk uitkomt op 26.
+	
+	Oplossing 26 dus na !!wwwwwf!wwf!!
+	
+	
+	
+	
+Overzicht alle gevraagde oplossingen:
+
+Uitkomst	Oplossing
+1			wwf
+2			ww
+5			!!wwwwwf
+24			!
+
+6			!!wwwwwf!wwf!
+10			!!wwwwwf!wf
+26			!!wwwwwf!wwf!!
+30			!!wwww
+
+	
+
+	
+Wat we merken is dat het volgende systeem potentieel is om als algoritme te gebruiken:
+
+	Begin met 4
+	1.	Trek steeds wortels en floor deze indien nodig om nieuwe oplossingen te vinden.
+	2. 	Neem de faculteit van de bij (1) gevonden oplossingen en begin met deze 
+		uitkomsten opnieuw bij 1.
+	3.	Worden er geen nieuwe (of betere) oplossingen gevonden, ga dan verder met de 
+		faculteit van het tot nu toe hoogste gevonden getal.
+	
+	Doe dit net zo lang totdat alle gewenste uitkomsten gevonden zijn. 
+	
+	
