@@ -2,7 +2,7 @@
 
 import math
 
-def getS(i, startNumber):
+def getS(i):
     """
     Function returns the state space as a list after maximal i opreations
     """
@@ -14,11 +14,11 @@ def getS(i, startNumber):
     elif i == 1:
         # Define states after one operation. Floor not included because
         # this operation doesn't make sense. 
-        s = [("w", startNumber**.5), ("!", math.factorial(startNumber))]
+        s = [("w", 4**.5), ("!", math.factorial(4))]
         return s
 
     else:
-        prevS = getS(i-1, startNumber)
+        prevS = getS(i-1)
         s = prevS[:]    # copy previous state space
 
         for state in prevS:
@@ -27,6 +27,7 @@ def getS(i, startNumber):
             
             # Create new states and append to state space
             newState1 = (sequence + "w", value**.5)
+
             newState2 = (sequence + "f", math.floor(value))
             
             s.append(newState1)
