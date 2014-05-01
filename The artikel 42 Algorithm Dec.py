@@ -3,10 +3,10 @@
 ## Algorithm to solve Number Crunching
 ## april 2014
 
-import csv
-import bisect, math
+import bisect, csv
+from math import *
+from decimal import *
 import pylab as plt
-from decimal import Decimal
 
 def getS(r):
     """
@@ -37,53 +37,35 @@ def getP(r, f):
         if elem not in f:
             return elem
 
-def isInt(num, e = 10**-15):
+def isInt(num):
     """
     Checks if num is possibly an int
-    num = number to check (float or int)
-    e = very small number
+    num = number to check (Decimal)
     output: True if num is an int and False if not
+
+    This part is only important for low numbers. For high numbers it is not so
+    easy to determine wheter a Decimal object is a real number or not. So we
+    assume that for high numbers it holds that they are not integer. This is
+    reasonable because for high numbers it is very rare that a square root
+    returns in an integer.
+
     """
 
-    numRound = round(num)
+    # Check only for number lower than a trillion
+    # Otherwise this checking method is not accurate
+    if num < 10 ** 12:
+        i = int(num)
+        f = float(num)
 
-    if abs(numRound - num) < e:
-        return True
+        # If there is no difference between the integere (rounded) and the
+        # float, the number is an integer.
+        if i - f == 0:
+            return True
+        else:
+            return False
     else:
-        return False
+        False
 
-def sqrt(num, seq=""):
-    """
-    Takes the square root of a number using a ten based logarithm.
-    This is usefull because python is not able to take the root of large numbers.
-    """
-    # Try the build in sqrt function which is more precise. If an overflow error
-    # occurs, use the logarithm to calculate the square root. 
-    try:
-        seq += "w"
-        sqrtNum = math.sqrt(num)
-    except OverflowError:
-        sqrtNum, seq = logSqrt(num, seq)
-        
-    return sqrtNum, seq
-
-def logSqrt(num, seq="", level=1):
-    """
-    Takes the square root of a number using a ten based logarithm.
-    This is usefull because python is not able to take the root of large numbers.
-    """
-        
-    logNum = math.log(num, 10)
-    try:
-        seq += "w"
-        fraction = 1 / 2.0 ** level
-        sqrtNum = 10 ** (fraction*logNum)
-    except OverflowError:
-        # When another overflow error occurs, take the square root another time
-        level += 1
-        sqrtNum, seq = logSqrt(num, seq, level)
-
-    return sqrtNum, seq
 
 def artikel42(endNum = 100, frac = 1, startNum = 4):
     """
@@ -92,9 +74,9 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
     input: startNum (int), endNum (int)
     output: Dictionary with the numbers and their sequences
     """
-    
+
     # Initialize variables
-    curNum = startNum
+    curNum = Decimal(startNum)
     results = [startNum]
     usedFacs = [1, 2]
     seq = ""
@@ -102,7 +84,7 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
     outputDic = {startNum: ""}
     maxStreak = getS(results)
 
-    # Keep track of the order of numbers that are found
+    # For visualization
     numFound = [startNum]
 
     # Go on untill the fraction of all numbers below endNum is found
@@ -110,21 +92,22 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
 
         # If the square root of the current number is higher than the highest
         # number of the streak from 1, it is usefull to explore this result.
-        if sqrt(curNum)[0] >= maxStreak + 1:
-            curNum, seq = sqrt(curNum, seq)
+        if curNum.sqrt() >= maxStreak + 1:
+            curNum = curNum.sqrt()
+            seq += 'w'
 
-            # Define potential result (use floor if needed)
+            # Convert Decimal into int (floors automatically)
+            potentialResult = int(curNum)
+
+            # Get sequence of potential number, add floor if needed
             if isInt(curNum):
-                potentialResult = round(curNum)
                 potentialSeq = seq
             else:
-                potentialResult = math.floor(curNum)
                 potentialSeq = seq + 'f'
 
             # Add potential result to results if it doesn't allready exist
-            if potentialResult not in results and potentialResult < 10 ** 6:
-                potentialResult = int(potentialResult) # Only store ints
-
+            if potentialResult not in results:
+                
                 # Adjust variables
                 bisect.insort(results, potentialResult)
                 maxStreak = getS(results)
@@ -133,22 +116,24 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
                     outputDic[potentialResult] = potentialSeq
                     numFound.append(potentialResult)
                     print len(outputDic), potentialResult
-
+                    
         # If the square root of the current number is lower than the highest
-        # number of the streak from 1 we allready have found, we have to take
+        # number of the streak from 1 we allready found, we have to take
         # the factorial of the number.
         else:
             p = getP(results, usedFacs)
             bisect.insort(usedFacs, p)
-            curNum = math.factorial(p)
+            curNum = factorial(p)
             bisect.insort(results, curNum)
             seq = seqDic[p] + "!"
-            seqDic[curNum] = seq
+            seqDic[int(curNum)] = seq
 
             if curNum <= endNum:
                 outputDic[curNum] = seq
                 numFound.append(curNum)
                 print len(outputDic), curNum
+                
+            curNum = Decimal(curNum)
 
     return outputDic, numFound
 
@@ -156,7 +141,7 @@ def storeResults(endNum = 100, frac = 1, startNum = 4):
     """
     """
 
-    outfile = open("Results/Rusults_" + str(endNum) + "_" + str(frac) + "_" +
+    outfile = open("Results/Rusults_Dec_" + str(endNum) + "_" + str(frac) + "_" +
                    str(startNum) + ".csv", 'w')
     writer = csv.writer(outfile, lineterminator="\n")
     writer.writerow(["Number", "Sequence"])
@@ -167,8 +152,8 @@ def storeResults(endNum = 100, frac = 1, startNum = 4):
         writer.writerow([num, outputDic[num]])
 
     outfile.close()
-    
 
+    
 """ Visualization """
 
 def plotFreqHist(endNum = 100, frac = 1, startNum = 4):
@@ -180,17 +165,17 @@ def plotFreqHist(endNum = 100, frac = 1, startNum = 4):
     numbers = []
     seqLen = []
 
-    for i in outputDic:
-        numbers.append(i)
+    for num in outputDic:
+        numbers.append(num)
         try:
-            seqLen.append(len(outputDic[i]))
+            seqLen.append(len(outputDic[num]))
         except KeyError:
             seqLen.append(0)
     
     plt.hist(numbers, weights = seqLen, facecolor='red', bins = endNum)
     plt.xlabel('numbers')
     plt.ylabel('length of sequence')
-    plt.title(r'Histogram of length of sequences')
+    plt.title(r'Histogram of length of sequences (DEC)')
     plt.show()
 
 def plotNumSeq(endNum = 100, frac = 1, startNum = 4):
@@ -201,7 +186,7 @@ def plotNumSeq(endNum = 100, frac = 1, startNum = 4):
 
     plt.plot(numFound, 'o')
     plt.plot(numFound)
-    plt.title('Order in which the first %i numbers are found' %(frac*endNum))
+    plt.title('Order in which the first %i numbers are found (DEC)' %(frac*endNum))
     plt.xlabel('order')
     plt.ylabel('number')
     plt.show()
