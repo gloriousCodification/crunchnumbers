@@ -86,7 +86,7 @@ Logisch beredeneren:
 	We zien dat als we 4 maal de wortel nemen van het hele grote getal we uitkomen op 
 	30.693... Dit flooren geeft 30.
 	
-	Oplossing 30 met !!wwww
+	Oplossing 30 met !!wwwwf
 	
 	
 	Het vinden van de oplossingen 10, 30, en 6 bieden weer nieuwe mogelijkheden die
@@ -104,7 +104,7 @@ Logisch beredeneren:
 	sqrt(6) = 2.449... wat niet verder helpt
 	6! = 720, sqrt(720) = 26.832... wat na een floor natuurlijk uitkomt op 26.
 	
-	Oplossing 26 dus na !!wwwwwf!wwf!!
+	Oplossing 26 dus na !!wwwwwf!wwf!!wf
 	
 	
 	
@@ -113,14 +113,14 @@ Overzicht alle gevraagde oplossingen:
 
 Uitkomst	Oplossing
 1			wwf
-2			ww
+2			w
 5			!!wwwwwf
 24			!
 
 6			!!wwwwwf!wwf!
 10			!!wwwwwf!wf
-26			!!wwwwwf!wwf!!
-30			!!wwww
+26			!!wwwwwf!wwf!!wf
+30			!!wwwwf
 
 	
 

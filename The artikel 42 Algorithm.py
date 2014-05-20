@@ -1,229 +1,278 @@
 ## The Artikel 42 Algorithm
 ## 
 ## Algorithm to solve Number Crunching
-## april 2014
+## may 2014
 
-import csv
-import bisect, math
+import bisect, csv
+from math import *
+from decimal import *
 import pylab as plt
-from decimal import Decimal
-
-def getS(r):
-    """
-    Get the highest number of a streak from 1
-    r = list of results
-    output: s (int)
-    """
-
-    s = 0
-
-    for i, elem in enumerate(r):
-        if i + 1 != elem:
-            s = i
-            return s
-
-    s = r[-1]
-    return s
+import cProfile
 
 def getP(r, f):
     """
-    Returns p for listst r and f. P is the largest element in p that is not an
-    element in f.
+    Returns p for listst r and f; p is the largest element in r that is not an
+    element of f.
     r = sorted list
     f = sorted list
-    output: element p
+    returns: element p
     """
     for elem in r:
         if elem not in f:
             return elem
 
-def isInt(num, e = 10**-15):
+def isInt(num):
     """
     Checks if num is possibly an int
-    num = number to check (float or int)
-    e = very small number
-    output: True if num is an int and False if not
+    num = number to check (Decimal)
+    returns: True if num is an int and False if not
+
+    This part is only important for low numbers. For high numbers it is not so
+    easy to determine wheter a Decimal object is a real number or not. So we
+    assume that for high numbers it holds that they are not integer. This is
+    reasonable because for high numbers it is very rare that a square root
+    returns in an integer.
     """
 
-    numRound = round(num)
+    # Check only for number lower than a billion
+    # Otherwise this checking method is not accurate
+    if num < 10 ** 9:
+        i = int(num)
+        f = float(num)
 
-    if abs(numRound - num) < e:
-        return True
+        # If there is no difference between the integere (rounded) and the
+        # float, the number is an integer.
+        if i - f == 0:
+            return True
+        else:
+            return False
     else:
-        return False
+        False
 
-def sqrt(num, seq=""):
+def getSeq(result, seqDic):
     """
-    Takes the square root of a number using a ten based logarithm.
-    This is usefull because python is not able to take the root of large numbers.
+    Returns the sequence for the given result and sequence dictionary
+    result = result for which we want to get the sequence (int)
+    seqDic = all results found with their sequence (dictionary)
+    returns: sequence (string)
     """
-    # Try the build in sqrt function which is more precise. If an overflow error
-    # occurs, use the logarithm to calculate the square root. 
-    try:
-        seq += "w"
-        sqrtNum = math.sqrt(num)
-    except OverflowError:
-        sqrtNum, seq = logSqrt(num, seq)
-        
-    return sqrtNum, seq
 
-def logSqrt(num, seq="", level=1):
-    """
-    Takes the square root of a number using a ten based logarithm.
-    This is usefull because python is not able to take the root of large numbers.
-    """
-        
-    logNum = math.log(num, 10)
-    try:
-        seq += "w"
-        fraction = 1 / 2.0 ** level
-        sqrtNum = 10 ** (fraction*logNum)
-    except OverflowError:
-        # When another overflow error occurs, take the square root another time
-        level += 1
-        sqrtNum, seq = logSqrt(num, seq, level)
+    num = result
+    parent = seqDic[num][0]
+    seqSoFar = seqDic[num][1]
 
-    return sqrtNum, seq
+    # Go on till 4 with parent None
+    while parent:
+        num = parent
+        parent = seqDic[num][0]
+        seqSoFar = seqDic[num][1] + seqSoFar
 
-def artikel42(endNum = 100, frac = 1, startNum = 4):
+    return seqSoFar
+
+def getSeqLength(result, seqDic):
+    """
+    Returns the length of a sequence for the given result and sequence dictionary
+    result = result for which we want to get the length of the sequence(int)
+    seqDic = all results found with their sequence (dictionary)
+    returns: length (int)
+    """
+    
+    seq = getSeq(result, seqDic)
+    length = len(seq)
+    return length
+
+def artikel42(endNum = 100, frac = 1):
     """
     Solves the Number Crunching problem. i.e. Gets the sequences to find all
     numbers smaller than endNum when starting at startNum
-    input: startNum (int), endNum (int)
-    output: Dictionary with the numbers and their sequences
+    endNum = highest number of the output (int)
+    frac = fraction of all numbers below endNum we want to find (float 0-1)
+    output: - Dictionary with the numbers as keys and value
+              (parent, sequence from parent, total sequence length)
+            - numFound (list) with the order in which the results are found
     """
-    
+
     # Initialize variables
-    curNum = startNum
+    startNum = 4
+    curNum = Decimal(startNum)
     results = [startNum]
     usedFacs = [1, 2]
-    seq = ""
-    seqDic = {startNum: ""}
-    outputDic = {startNum: ""}
-    maxStreak = getS(results)
-
-    # Keep track of the order of numbers that are found
+    seq = "" 
+    seqDic = {startNum: (None,"",0)}
+    parent = startNum
+    
+    # Keep track of all numbers found that are lower than endNum. 
     numFound = [startNum]
-
+    percentages = []
+    
     # Go on untill the fraction of all numbers below endNum is found
-    while len(outputDic) < frac * endNum:
+    while len(numFound) < frac * endNum:
 
-        # If the square root of the current number is higher than the highest
-        # number of the streak from 1, it is usefull to explore this result.
-        if sqrt(curNum)[0] >= maxStreak + 1:
-            curNum, seq = sqrt(curNum, seq)
+        # Print progress
+        fracFound = float(len(numFound)) / (frac * endNum)
+        perFound = int(fracFound * 100)
+        if perFound % 10 == 0 and perFound not in percentages:
+            percentages.append(perFound)
+            print str(perFound) + "% found"
 
-            # Define potential result (use floor if needed)
-            if isInt(curNum):
-                potentialResult = round(curNum)
-                potentialSeq = seq
-            else:
-                potentialResult = math.floor(curNum)
-                potentialSeq = seq + 'f'
+        # Change current number by taking square root
+        curNum = curNum.sqrt()
+        seq += 'w'
 
-            # Add potential result to results if it doesn't allready exist
-            if potentialResult not in results and potentialResult < 10 ** 6:
-                potentialResult = int(potentialResult) # Only store ints
-
-                # Adjust variables
-                bisect.insort(results, potentialResult)
-                maxStreak = getS(results)
-                seqDic[potentialResult] = potentialSeq
-                if potentialResult <= endNum:
-                    outputDic[potentialResult] = potentialSeq
-                    numFound.append(potentialResult)
-                    print len(outputDic), potentialResult
-
-        # If the square root of the current number is lower than the highest
-        # number of the streak from 1 we allready have found, we have to take
-        # the factorial of the number.
+        # Continue if curNum is greater than 1 million because these results are
+        # not really useful and it saves a lot of memory
+        if curNum > 10 ** 6:
+            continue 
+        
+        # Get new potential result (int function floors automatically)
+        potentialResult = int(curNum)
+        
+        # Get sequence of potential number, add floor if needed
+        if isInt(curNum):
+            potentialSeq = seq
         else:
-            p = getP(results, usedFacs)
-            bisect.insort(usedFacs, p)
-            curNum = math.factorial(p)
-            bisect.insort(results, curNum)
-            seq = seqDic[p] + "!"
-            seqDic[curNum] = seq
+            potentialSeq = seq + 'f'
+        potentialSeqLength = seqDic[parent][2] + len(potentialSeq)
+                
+        if potentialResult not in results:
+            # Store new result
+            bisect.insort(results, potentialResult)
+            seqDic[potentialResult] = (parent, potentialSeq, potentialSeqLength)
+            if potentialResult <= endNum:
+                numFound.append(potentialResult)    
+        else:
+            # Compare new sequence to existing sequence
+            existingLength = seqDic[potentialResult][2]
+            if  potentialSeqLength < existingLength:
+                # When new seq is shorter, adjust result and go on with another
+                # square root.
+                seqDic[potentialResult] = (parent, potentialSeq,
+                                           potentialSeqLength)
+                
+            else:
+                # When a potential result is allready found with a shorter sequence
+                # we need to take the factorial of 'p' to get new results.
+                p = getP(results, usedFacs)
+                bisect.insort(usedFacs, p)
+                # p is the new current number. Assume that result p! is not allready
+                # found so append p! to results
+                curNum = factorial(p)
+                bisect.insort(results, curNum)
+                seqDic[int(curNum)] = (p, "!", seqDic[p][2] + 1)
+                seq = ""    # new seq from p!
+                if curNum <= endNum:
+                    numFound.append(curNum)
 
-            if curNum <= endNum:
-                outputDic[curNum] = seq
-                numFound.append(curNum)
-                print len(outputDic), curNum
+                parent = curNum     #curNum is the new parent
+                curNum = Decimal(curNum)
 
+    # Create output (seqDic with only results <= endNum)
+    outputDic = {}
+    for result in results[:int(frac*endNum)]:
+            outputDic[result] = getSeq(result, seqDic)
+    
     return outputDic, numFound
 
-def storeResults(endNum = 100, frac = 1, startNum = 4):
+""" -------------------- Code for Storing Results -------------------- """
+
+def storeResults(endNum = 100, frac = 1):
     """
+    Stores the results of the artikel42 algorithm.
+    endNum = highest number of the output (int)
+    frac = fraction of all numbers below endNum we want to find (float 0-1)
+    output: csv file with the results and their sequences
     """
 
-    outfile = open("Results/Rusults_" + str(endNum) + "_" + str(frac) + "_" +
-                   str(startNum) + ".csv", 'w')
+    outfile = open("Results/Results_bla_" + str(endNum) + "_" + str(frac) + ".csv",
+                   'w')
     writer = csv.writer(outfile, lineterminator="\n")
     writer.writerow(["Number", "Sequence"])
 
-    outputDic, numFound = artikel42(endNum, frac, startNum)
+    outputDic, numFound = artikel42(endNum, frac)
 
+    # first order results
+    orderedResults = []
     for num in outputDic:
+        bisect.insort(orderedResults, num)
+
+    for num in orderedResults:
         writer.writerow([num, outputDic[num]])
 
     outfile.close()
-    
 
-""" Visualization """
 
-def plotFreqHist(endNum = 100, frac = 1, startNum = 4):
+""" -------------------- Code for Visualizations -------------------- """
+
+def uploadResults(fileName):
     """
+    Uploads results from a csv file.
+    fileName = name of the file to upload (string)
+    output: results (list), all results in the csv file
+            seqLen (list), sequence length of the results
     """
-
-    outputDic, numFound = artikel42(endNum, frac, startNum)
-
-    numbers = []
+    results = []
     seqLen = []
-
-    for i in outputDic:
-        numbers.append(i)
-        try:
-            seqLen.append(len(outputDic[i]))
-        except KeyError:
-            seqLen.append(0)
     
-    plt.hist(numbers, weights = seqLen, facecolor='red', bins = endNum)
-    plt.xlabel('numbers')
+    with open(fileName, 'rb') as csvfile:
+        lines = csv.reader(csvfile)
+        
+        for line in lines:
+            if not line[0] == 'Number':
+                results.append(int(line[0]))
+                seqLen.append(len(line[1]))
+
+    return results, seqLen
+
+def plotSeqLenHist(fileName):
+    """
+    Plots a histogram of the length of the sequences for the results stored in
+    the given file.
+    fileName = name of the file with the results (string)
+    output: Histogram of sequence lengths
+    """
+
+    results, seqLen = uploadResults("Results/" + fileName)
+    
+    plt.hist(results, weights = seqLen, facecolor='red', bins = results[-1])
+    plt.xlabel('results')
     plt.ylabel('length of sequence')
     plt.title(r'Histogram of length of sequences')
     plt.show()
 
-def plotNumSeq(endNum = 100, frac = 1, startNum = 4):
+
+def plotResultOrder(endNum = 100, frac = 1):
     """
+    Plots the order in which the results are found.
+    endNum = highest number of the output (int)
+    frac = fraction of all numbers below endNum we want to find (float 0-1)
+    output: graph of the order of results
     """
 
-    outputDic, numFound = artikel42(endNum, frac, startNum)
+    outputDic, numFound = artikel42(endNum, frac)
 
     plt.plot(numFound, 'o')
     plt.plot(numFound)
-    plt.title('Order in which the first %i numbers are found' %(frac*endNum))
+    plt.title('Order in which the first %i results below %i are found' %(frac*endNum, endNum))
     plt.xlabel('order')
-    plt.ylabel('number')
+    plt.ylabel('result')
     plt.show()
-    
-        
-"""Functions to check the results"""
+
+
+""" -------------------- Code for Checking Sequences -------------------- """
 
 def performSeq(seq, startNum=4):
     """
-    This functions preforms the given sequence (list) on the startnumber
-    startNum (int) to see the result.
+    This functions preforms the given sequence (string) on the startnumber
+    startNum (int) to check the result.
     """
-    curNum = startNum
+    curNum = Decimal(startNum)
     
     for operator in seq:
-##        print "Operator:", operator, "  curNum:", curNum
         if operator == "w":
-            curNum = sqrt(curNum)[0]
+            curNum = curNum.sqrt()
         elif operator == "f":
-            curNum = math.floor(curNum)
+            curNum = Decimal(int(curNum))
         else:
-            curNum = math.factorial(curNum)
+            curNum = Decimal(factorial(curNum))
 
     return curNum
-            

@@ -1,7 +1,10 @@
-## The Artikel 42 Algorithm
+## The Artikel 42 Algorithm 2.0
 ## 
 ## Algorithm to solve Number Crunching
-## april 2014
+## may 2014
+##
+## Dec 2.0 uses Decimal objects and check whether a new result has a shorter
+## sequence than the previous found.
 
 import bisect, csv
 from math import *
@@ -116,6 +119,17 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
                     outputDic[potentialResult] = potentialSeq
                     numFound.append(potentialResult)
                     print len(outputDic), potentialResult
+            else:
+                if len(seqDic[potentialResult]) > len(potentialSeq):
+
+                    # Adjust variables
+                    bisect.insort(results, potentialResult)
+                    maxStreak = getS(results)
+                    seqDic[potentialResult] = potentialSeq
+                    if potentialResult <= endNum:
+                        outputDic[potentialResult] = potentialSeq
+                        numFound.append(potentialResult)
+                        print len(outputDic), potentialResult
                     
         # If the square root of the current number is lower than the highest
         # number of the streak from 1 we allready found, we have to take
@@ -141,7 +155,7 @@ def storeResults(endNum = 100, frac = 1, startNum = 4):
     """
     """
 
-    outfile = open("Results/Rusults_Dec_" + str(endNum) + "_" + str(frac) + "_" +
+    outfile = open("Results/Rusults_Dec_2.0_" + str(endNum) + "_" + str(frac) + "_" +
                    str(startNum) + ".csv", 'w')
     writer = csv.writer(outfile, lineterminator="\n")
     writer.writerow(["Number", "Sequence"])
