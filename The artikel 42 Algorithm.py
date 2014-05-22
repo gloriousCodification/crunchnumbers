@@ -108,12 +108,12 @@ def artikel42(endNum = 100, frac = 1):
     # Go on untill the fraction of all numbers below endNum is found
     while len(numFound) < frac * endNum:
 
-        # Print progress
-        fracFound = float(len(numFound)) / (frac * endNum)
-        perFound = int(fracFound * 100)
-        if perFound % 10 == 0 and perFound not in percentages:
-            percentages.append(perFound)
-            print str(perFound) + "% found"
+##        # Print progress
+##        fracFound = float(len(numFound)) / (frac * endNum)
+##        perFound = int(fracFound * 100)
+##        if perFound % 10 == 0 and perFound not in percentages:
+##            percentages.append(perFound)
+##            print str(perFound) + "% found"
 
         # Change current number by taking square root
         curNum = curNum.sqrt()

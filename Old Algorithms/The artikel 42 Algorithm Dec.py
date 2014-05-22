@@ -137,7 +137,7 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
                 
             curNum = Decimal(curNum)
 
-    print len(results)
+##    print len(results)
 
     return outputDic, numFound
 

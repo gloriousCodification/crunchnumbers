@@ -133,7 +133,7 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
                 if potentialResult <= endNum:
                     outputDic[potentialResult] = potentialSeq
                     numFound.append(potentialResult)
-                    print len(outputDic), potentialResult
+##                    print len(outputDic), potentialResult
 
         # If the square root of the current number is lower than the highest
         # number of the streak from 1 we allready have found, we have to take
@@ -149,7 +149,7 @@ def artikel42(endNum = 100, frac = 1, startNum = 4):
             if curNum <= endNum:
                 outputDic[curNum] = seq
                 numFound.append(curNum)
-                print len(outputDic), curNum
+##                print len(outputDic), curNum
 
     return outputDic, numFound
 
